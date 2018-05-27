@@ -4,14 +4,13 @@ LABEL maintainer="don@agilicus.com"
 # Build v0.9.0. This commit-id was
 # signed by 91A6868BD3F7A907
 # https://github.com/restic/restic/issues/1819 for the sed
+# Use 0183fea926f6fe801d20f53d3c677ee0bd86d6e2 as commit
+# since it picks up the fix for 1819
 RUN mkdir -p /go/src/github.com/restic \
  && cd /go/src/github.com/restic \
  && git clone https://github.com/restic/restic \
  && cd restic \
- && git checkout -b build  e40191942da7e83e45f995cf9f2d5ae54f97289f \
- && sed -i -e 's?return.*?return true?' internal/ui/termstatus/background_linux.go \
- && sed -i -e 's?func.*SetStatus.*?&\n        return\n?' internal/ui/termstatus/status.go \
- && sed -i -e '/go-isatty/d' -e 's?return isatty.*?return false?' internal/ui/termstatus/terminal_unix.go \
+ && git checkout -b build  0183fea926f6fe801d20f53d3c677ee0bd86d6e2 \
  && go run build.go
 
 
