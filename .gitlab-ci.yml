@@ -1,4 +1,4 @@
-image: docker:stable
+image: cr.agilicus.com/corp-tools/docker-compose
 
 variables:
   DOCKER_DRIVER: overlay2
@@ -7,15 +7,38 @@ variables:
   CONTAINER_IMAGE: $CI_REGISTRY/$CI_PROJECT_PATH
 
 services:
+  - name: docker:dind
+
+stages:
+  - build
+  - scan
+
+before_script:
+  - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN $CI_REGISTRY
+
+services:
 - name: docker:dind
 
 build:
   stage: build
   script:
   - echo Start build
-  - docker info
-  - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN $CI_REGISTRY
   - docker pull $CONTAINER_IMAGE:latest || true
   - docker build --cache-from $CONTAINER_IMAGE:latest --tag $CONTAINER_IMAGE:$CI_BUILD_REF --tag $CONTAINER_IMAGE:latest .
   - docker push $CONTAINER_IMAGE:$CI_BUILD_REF
   - docker push $CONTAINER_IMAGE:latest
+
+scan:
+  stage: scan
+  artifacts:
+    name: "$CI_PROJECT_PATH-$CI_COMMIT_REF_NAME"
+    paths:
+      - reports/
+  script:
+    - echo Analyse container for vulnerability
+    - clairctl analyze --log-level debug $CONTAINER_IMAGE:$CI_BUILD_REF || true
+    - echo Generate JSON report
+    - clairctl report -f json $CONTAINER_IMAGE:$CI_BUILD_REF || true
+    - echo Generate HTML report
+    - clairctl report -f html $CONTAINER_IMAGE:$CI_BUILD_REF || true
+
