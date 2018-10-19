@@ -1,3 +1,4 @@
+---
 image: cr.agilicus.com/corp-tools/docker-compose
 
 variables:
@@ -24,17 +25,17 @@ before_script:
     \"https://chat.googleapis.com/v1/spaces/$HANGOUTS_SPACE/messages?key=$HANGOUTS_KEY&token=$HANGOUTS_TOKEN&threadKey=$HANGOUTS_THREAD\"
     -d \"{\\\"text\\\":\\\"$HANGOUTS_MSG\\\"}\""
 
-services:
-- name: docker:dind
-
 build:
   stage: build
-  script:
-  - echo Start build
-  - docker pull $CONTAINER_IMAGE:latest || true
-  - docker build --cache-from $CONTAINER_IMAGE:latest --tag $CONTAINER_IMAGE:$CI_BUILD_REF --tag $CONTAINER_IMAGE:latest .
-  - docker push $CONTAINER_IMAGE:$CI_BUILD_REF
-  - docker push $CONTAINER_IMAGE:latest
+  script: |
+    echo Start build
+    docker build --tag $CONTAINER_IMAGE:$CI_COMMIT_REF_NAME .
+    docker push $CONTAINER_IMAGE:$CI_COMMIT_REF_NAME
+    if [ "$CI_COMMIT_REF_NAME" = "master" ];
+    then
+      docker tag $CONTAINER_IMAGE:$CI_COMMIT_REF_NAME $CONTAINER_IMAGE:latest
+      docker push $CONTAINER_IMAGE:latest
+    fi
 
 scan:
   stage: scan
@@ -44,9 +45,6 @@ scan:
       - reports/
   script:
     - echo Analyse container for vulnerability
-    - clairctl analyze --log-level debug $CONTAINER_IMAGE:$CI_BUILD_REF || true
-    - echo Generate JSON report
-    - clairctl report -f json $CONTAINER_IMAGE:$CI_BUILD_REF || true
-    - echo Generate HTML report
-    - clairctl report -f html $CONTAINER_IMAGE:$CI_BUILD_REF || true
-
+    - clairctl analyze --log-level debug $CONTAINER_IMAGE:$CI_COMMIT_REF_NAME || true
+    - clairctl report -f json $CONTAINER_IMAGE:$CI_COMMIT_REF_NAME || true
+    - clairctl report -f html $CONTAINER_IMAGE:$CI_COMMIT_REF_NAME || true
