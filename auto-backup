@@ -20,7 +20,7 @@ then
 
     # minute hour day-of-month month day-of-week command
     echo 'MAILTO=""' > /etc/crontabs/root
-    echo "$((RANDOM % 60)) */$RESTIC_INTERVAL * * * [ -n \"\$(ls $RESTIC_BACKUP_DIR)\" ] && /usr/bin/restic backup --cleanup-cache -q --host=$RESTIC_HOSTNAME $RESTIC_BACKUP_DIR >/proc/1/fd/1 2>/proc/1/fd/2 && find $WIKI_BACKUP_DIR -type f -mtime +1 -exec rm {} \;" >> /etc/crontabs/root
+    echo "$((RANDOM % 60)) */$RESTIC_INTERVAL * * * [ -n \"\$(ls $RESTIC_BACKUP_DIR)\" ] && /usr/bin/restic backup --cleanup-cache -q --host=$RESTIC_HOSTNAME $RESTIC_BACKUP_DIR >/proc/1/fd/1 2>/proc/1/fd/2 && find $RESTIC_BACKUP_DIR -type f -mtime +1 -exec rm {} \;" >> /etc/crontabs/root
     ln -sf /etc/crontabs/root /var/spool/cron/crontabs/root
     exec /usr/sbin/cron -f -L6
 else
