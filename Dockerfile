@@ -7,4 +7,5 @@ RUN apt-get update \
  && sed -i -e '/imklog/d' /etc/rsyslog.conf
 
 ADD auto-backup /usr/bin/auto-backup
+ADD backup.sh /backup.sh
 ENTRYPOINT [ "/usr/bin/auto-backup" ]
