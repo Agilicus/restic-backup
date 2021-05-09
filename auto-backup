@@ -27,7 +27,6 @@ then
     # minute hour day-of-month month day-of-week command
     echo 'MAILTO=""' > /tmp/crontab
     echo "$((RANDOM % 60)) */$RESTIC_INTERVAL * * * /backup.sh" >> /tmp/crontab
-    echo "* * * * * /backup.sh" >> /tmp/crontab
     crontab /tmp/crontab
     crontab -l
     rm -f /tmp/crontab
