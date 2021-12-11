@@ -1,8 +1,8 @@
 #!/bin/bash
 set -e
 
-exec 1>/proc/1/fd/1
-exec 2>/proc/1/fd/2
+#exec 1>/proc/1/fd/1
+#exec 2>/proc/1/fd/2
 
 log() {
     echo "$(date -Is): $*"
